@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import Expense
 from .forms import ExpenseForm
 
 
+@login_required
 def expense_list(request):
-    expenses = Expense.objects.all().order_by('-date')
+    expenses = Expense.objects.filter(user=request.user).order_by('-date')
     return render(request, 'expenses/expense_list.html', { 'expenses': expenses })
 
 
+@login_required
 def add_expense(request):
     if request.method == 'POST':
         form = ExpenseForm(request.POST)
@@ -21,6 +24,7 @@ def add_expense(request):
     return render(request, 'expenses/add_expense.html', { 'form': form })
 
 
+@login_required
 def edit_expense(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     if request.method == 'POST':
@@ -33,6 +37,7 @@ def edit_expense(request, pk):
     return render(request, 'expenses/edit_expense.html', { 'form': form, 'expense': expense })
 
 
+@login_required
 def delete_expense(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     if request.method == 'POST':

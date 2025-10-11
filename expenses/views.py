@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .models import Expense
 from .forms import ExpenseForm
 
@@ -18,6 +19,7 @@ def add_expense(request):
             expense = form.save(commit=False)
             expense.user = request.user
             expense.save()
+            messages.success(request, "Expense added successfully ✅")
             return redirect('expense_list')
     else:
         form = ExpenseForm()
@@ -31,6 +33,7 @@ def edit_expense(request, pk):
         form = ExpenseForm(request.POST, instance=expense)
         if form.is_valid():
             form.save()
+            messages.success(request, "Expense updated succeessfully ✏️")
             return redirect('expense_list')
     else:
         form = ExpenseForm(instance=expense)
@@ -42,5 +45,6 @@ def delete_expense(request, pk):
     expense = get_object_or_404(Expense, pk=pk)
     if request.method == 'POST':
         expense.delete()
+        messages.warning(request, "Expense deleted 🗑️")
         return redirect('expense_list')
     return render(request, 'expenses/confirm_delete.html', { 'expense': expense })

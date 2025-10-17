@@ -1,8 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Sum
+from django.db.models.functions import ExtractMonth
 from .models import Expense
 from .forms import ExpenseForm
+import json
 
 
 @login_required
@@ -48,3 +51,43 @@ def delete_expense(request, pk):
         messages.warning(request, "Expense deleted 🗑️")
         return redirect('expense_list')
     return render(request, 'expenses/confirm_delete.html', { 'expense': expense })
+
+
+@login_required
+def dashboard(request):
+    expenses = Expense.objects.filter(user=request.user)
+
+    # Total spending
+    total_spent = expenses.aggregate(total=Sum('amount'))['total'] or 0
+
+    # Spending by category
+    category_data = (
+        expenses.values('category')
+        .annotate(total=Sum('amount'))
+        .order_by('-total')
+    )
+
+    categories = [item['category'] for item in category_data]
+    category_totals = [float(item['total']) for item in category_data]
+
+    # Monthly spending trend
+    monthly_data = (
+        expenses.annotate(month=ExtractMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    months = [item['month'] for item in monthly_data]
+    monthly_totals = [float(item['total']) for item in monthly_data]
+
+    context = {
+        'total_spent': total_spent,
+        'categories': json.dumps(categories),
+        'category_totals': json.dumps(category_totals),
+        'months': json.dumps(months),
+        'monthly_totals': json.dumps(monthly_totals),
+    }
+
+    return render(request, 'expenses/dashboard.html', context)
+

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Dashboard</h2>
+    <div class="p-3 mb-4">
+        <h4>Total Spending: ₹{{ total_spent }}</h4>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card p-3">
+                <h5>Spending by Category</h5>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card p-3">
+                <h5>Monthly Spending</h5>
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const categories = JSON.parse('{{ categories|escapejs }}')
+    const categoryTotals = JSON.parse('{{ category_totals|escapejs }}')
+    const months = JSON.parse('{{ months|escapejs }}')
+    const monthlyTotals = JSON.parse('{{ monthly_totals|escapejs }}')
+
+    // Category Pie Chart
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'pie',
+        data: {
+            labels: categories,
+            datasets: [{
+                data: categoryTotals,
+                backgroundColor: [
+                    '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                ]
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+
+    // Monthly Pie Chart
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: '₹ Spent',
+                data: monthlyTotals,
+                backgroundColor: '#36A2EB'
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}

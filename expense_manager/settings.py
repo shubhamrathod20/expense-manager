@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-71as=j0-#%d=ai7)81sib
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['https://expense-manager-qu7v.onrender.com/', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['expense-manager-qu7v.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition

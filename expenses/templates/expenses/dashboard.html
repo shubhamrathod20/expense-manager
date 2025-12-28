@@ -2,22 +2,63 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">Dashboard</h2>
-    <div class="p-3 mb-4">
-        <h4>Total Spending: ₹{{ total_spent }}</h4>
+    <div class="row mb-4 text-center">
+        <div class="col md-4">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <h5>Total Income</h5>
+                    <h3>{{ total_income }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col md-4">
+            <div class="card bg-danger text-white shadow">
+                <div class="card-body">
+                    <h5>Total Spent</h5>
+                    <h3>{{ total_spent }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col md-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h5>Balance</h5>
+                    <h3>{{ balance }}</h3>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row">
         <div class="col-md-6 mb-4">
             <div class="card p-3">
                 <h5>Spending by Category</h5>
-                <canvas id="categoryChart"></canvas>
+                <canvas id="expenseCategoryChart"></canvas>
             </div>
         </div>
 
         <div class="col-md-6 mb-4">
             <div class="card p-3">
                 <h5>Monthly Spending</h5>
-                <canvas id="monthlyChart"></canvas>
+                <canvas id="expenseMonthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card p-3">
+                <h5>Income by Category</h5>
+                <canvas id="incomeCategoryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card p-3">
+                <h5>Monthly Income</h5>
+                <canvas id="incomeMonthlyChart"></canvas>
             </div>
         </div>
     </div>
@@ -26,18 +67,25 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const categories = JSON.parse('{{ categories|escapejs }}')
-    const categoryTotals = JSON.parse('{{ category_totals|escapejs }}')
-    const months = JSON.parse('{{ months|escapejs }}')
-    const monthlyTotals = JSON.parse('{{ monthly_totals|escapejs }}')
+    const expenseCategories = JSON.parse('{{ expense_categories|escapejs }}')
+    const expenseCategoryTotals = JSON.parse('{{ expense_category_totals|escapejs }}')
 
-    // Category Pie Chart
-    new Chart(document.getElementById('categoryChart'), {
+    const incomeCategories = JSON.parse('{{ income_categories|escapejs }}')
+    const incomeCategoryTotals = JSON.parse('{{ income_category_totals|escapejs }}')
+
+    const expenseMonths = JSON.parse('{{ expense_months|escapejs }}')
+    const expenseMonthlyTotals = JSON.parse('{{ expense_monthly_totals|escapejs }}')
+
+    const incomeMonths = JSON.parse('{{ income_months|escapejs }}')
+    const incomeMonthlyTotals = JSON.parse('{{ income_monthly_totals|escapejs }}')
+
+    // Expense Category Pie Chart
+    new Chart(document.getElementById('expenseCategoryChart'), {
         type: 'pie',
         data: {
-            labels: categories,
+            labels: expenseCategories,
             datasets: [{
-                data: categoryTotals,
+                data: expenseCategoryTotals,
                 backgroundColor: [
                     '#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
                 ]
@@ -50,14 +98,33 @@
         }
     });
 
-    // Monthly Pie Chart
-    new Chart(document.getElementById('monthlyChart'), {
+    // Income Category Pie Chart
+    new Chart(document.getElementById('incomeCategoryChart'), {
+        type: 'pie',
+        data: {
+            labels: incomeCategories,
+            datasets: [{
+                data: incomeCategoryTotals,
+                backgroundColor: [
+                    '#4CAF50','#8BC34A','#CDDC39','#AED581'
+                ]
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    })
+
+    // Expense Monthly Pie Chart
+    new Chart(document.getElementById('expenseMonthlyChart'), {
         type: 'bar',
         data: {
-            labels: months,
+            labels: expenseMonths,
             datasets: [{
                 label: '₹ Spent',
-                data: monthlyTotals,
+                data: expenseMonthlyTotals,
                 backgroundColor: '#36A2EB'
             }]
         },
@@ -67,5 +134,23 @@
             }
         }
     });
+
+    // Income Monthly Chart
+    new Chart(document.getElementById('incomeMonthlyChart'), {
+        type: 'bar',
+        data: {
+            labels: incomeMonths,
+            datasets: [{
+                label: '₹ Earned',
+                data: incomeMonthlyTotals,
+                backgroundColor: '#4CAF50'
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    })
 </script>
 {% endblock %}

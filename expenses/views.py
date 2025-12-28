@@ -11,7 +11,19 @@ import json
 @login_required
 def expense_list(request):
     expenses = Expense.objects.filter(user=request.user).order_by('-date')
-    return render(request, 'expenses/expense_list.html', { 'expenses': expenses })
+
+    total_income = expenses.filter(type='Income').aggregate(total=Sum('amount'))['total'] or 0
+    total_expense = expenses.filter(type='Expense').aggregate(total=Sum('amount'))['total'] or 0
+
+    balance = total_income - total_expense
+
+    context = {
+        'expenses': expenses,
+        'balance': balance,
+        'total_income': total_income,
+        'total_expense': total_expense,
+    }
+    return render(request, 'expenses/expense_list.html', context)
 
 
 @login_required
@@ -58,35 +70,71 @@ def dashboard(request):
     expenses = Expense.objects.filter(user=request.user)
 
     # Total spending
-    total_spent = expenses.aggregate(total=Sum('amount'))['total'] or 0
+    total_income = expenses.filter(type='Income').aggregate(total=Sum('amount'))['total'] or 0
+    total_spent = expenses.filter(type='Expense').aggregate(total=Sum('amount'))['total'] or 0
+
+    balance = total_income - total_spent
 
     # Spending by category
-    category_data = (
-        expenses.values('category')
+    expense_category_data = (
+        expenses.filter(type='Expense')
+        .values('category')
         .annotate(total=Sum('amount'))
         .order_by('-total')
     )
 
-    categories = [item['category'] for item in category_data]
-    category_totals = [float(item['total']) for item in category_data]
+    expense_categories = [item['category'] for item in expense_category_data]
+    expense_category_totals = [float(item['total']) for item in expense_category_data]
+
+    # Income by category
+    income_category_data = (
+        expenses.filter(type='Income')
+        .values('category')
+        .annotate(total=Sum('amount'))
+        .order_by('-total')
+    )
+
+    income_categories = [item['category'] for item in income_category_data]
+    income_category_totals = [float(item['total']) for item in income_category_data]
 
     # Monthly spending trend
-    monthly_data = (
-        expenses.annotate(month=ExtractMonth('date'))
+    expense_monthly_data = (
+        expenses.filter(type='Expense')
+        .annotate(month=ExtractMonth('date'))
         .values('month')
         .annotate(total=Sum('amount'))
         .order_by('month')
     )
 
-    months = [item['month'] for item in monthly_data]
-    monthly_totals = [float(item['total']) for item in monthly_data]
+    expense_months = [item['month'] for item in expense_monthly_data]
+    expense_monthly_totals = [float(item['total']) for item in expense_monthly_data]
+
+    # Monthly income trend
+    income_monthly_data = (
+        expenses.filter(type='Income')
+        .annotate(month=ExtractMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    income_months = [item['month'] for item in income_monthly_data]
+    income_monthly_totals = [float(item['total']) for item in income_monthly_data]
 
     context = {
+        'balance': balance,
+        'total_income': total_income,
         'total_spent': total_spent,
-        'categories': json.dumps(categories),
-        'category_totals': json.dumps(category_totals),
-        'months': json.dumps(months),
-        'monthly_totals': json.dumps(monthly_totals),
+        
+        'expense_categories': json.dumps(expense_categories),
+        'expense_category_totals': json.dumps(expense_category_totals),
+        'income_categories': json.dumps(income_categories),
+        'income_category_totals': json.dumps(income_category_totals),
+
+        'expense_months': json.dumps(expense_months),
+        'expense_monthly_totals': json.dumps(expense_monthly_totals),
+        'income_months': json.dumps(income_months),
+        'income_monthly_totals': json.dumps(income_monthly_totals)
     }
 
     return render(request, 'expenses/dashboard.html', context)

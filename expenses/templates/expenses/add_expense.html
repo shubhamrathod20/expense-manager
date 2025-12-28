@@ -6,10 +6,72 @@
     <div class="card-body">
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Title</label>
+                {{ form.title }}
+            </div>
+            <div class="mb-3">
+                <label for="id_amount" class="form-label">Amount</label>
+                {{ form.amount }}
+            </div>
+            <div class="mb-3">
+                <label for="id_type" class="form-label">Type</label>
+                {{ form.type }}
+            </div>
+            <div class="mb-3">
+                <label for="id_category" class="form-label">Category</label>
+                {{ form.category }}
+            </div>
+            <div class="mb-3">
+                <label for="id_date" class="form-label">Date</label>
+                {{ form.date }}
+            </div>
+            <div class="mb-3">
+                <label for="id_description" class="form-label">Description</label>
+                {{ form.description }}
+            </div>
+            <!-- {{ form.as_p }} -->
             <button type="submit" class="btn btn-dark">Save Expense</button>
             <a href="{% url 'expense_list' %}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const typeField = document.getElementById("id_type");
+        const categoryField = document.getElementById("id_category");
+        
+        const expenseCategories = ['Food', 'Transport', 'Bills', 'Shopping', 'Entertainment', 'Other']
+        const incomeCategories = ['Salary', 'Bonus', 'Gift', 'Refund', 'Other Income']
+
+        const updateCategoryOptions = () => {
+            const typeValue = typeField.value;
+
+            for (let option of categoryField.options) {
+                const value = option.value;
+
+                if (!value) {
+                    option.hidden = false;
+                    continue;
+                }
+
+                if (typeValue === 'Income') {
+                    option.hidden = !incomeCategories.includes(value);
+                } else if (typeValue === 'Expense') {
+                    option.hidden = !expenseCategories.includes(value);
+                } else {
+                    option.hidden = false;
+                }
+            }
+
+            const selected = categoryField.selectedOptions[0];
+            if (selected && selected.hidden) {
+                categoryField.value = '';
+            }
+        }
+
+        typeField.addEventListener("change", updateCategoryOptions);
+        updateCategoryOptions();
+    });
+</script>
 {% endblock %}

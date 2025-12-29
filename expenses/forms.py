@@ -6,28 +6,15 @@ class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
         fields = ['title', 'amount', 'type', 'category', 'date', 'description']
-        # widgets = {
-        #     'date': forms.DateInput(attrs={'type': 'date'}),
-        #     'description': forms.Textarea(attrs={'rows': 2}),
-        # }
-    
-
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-
-    #     self.fields['category'].choices = []
-
-    #     if 'type' in self.data:
-    #         selected_type = self.data.get('type')
-    #         if selected_type == 'Income':
-    #             self.fields['category'].choices = Expense.INCOME_CATEGORIES
-    #         else:
-    #             self.fields['categoty'].choices = Expense.EXPENSE_CATEGORIES
-    #     elif self.instance.pk:
-    #         if self.instance.type == 'Income':
-    #             self.fields['category'].choices = Expense.INCOME_CATEGORIES
-    #         else:
-    #             self.fields['category'].choices = Expense.EXPENSE_CATEGORIES
+        widgets = {
+            'date': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    
+                }
+            ),
+            'description': forms.Textarea(attrs={'rows': 2}),
+        }
 
         def clean(self):
             cleaned_data = super().clean()
